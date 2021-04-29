@@ -4,10 +4,25 @@ services:
   prometheus:
     image: prom/prometheus
     container_name: promethues
-    network_mode: host
     command:
-      - '--web.listen-address=0.0.0.0:9090'
+      # With this setting, the default Prometheus.yml is set.
+      # You can change the route you want.
       - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+    - 9090:9090
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+    - 8080:8080
+    depends_on:
+      - redis
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+    - 6379:6379
+  # TODO: Node Exporter, PostgresSQL Exporter, MySQL Exporter
   node_exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: node_exporter
@@ -16,3 +31,12 @@ services:
     network_mode: host
     pid: host
     restart: unless-stopped
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter
+    ports:
+    - 9187:9187
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+    - 3000:3000
